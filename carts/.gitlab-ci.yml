@@ -1,0 +1,23 @@
+stages:
+    - build
+    - image
+
+maven-build:
+    stage: build
+    image: maven:3.3.9-jdk-8-alpine
+    script:
+        - mvn -B clean package
+    artifacts:
+        paths:
+            - "/builds/ACLUser2.0/carts/target/"
+
+docker-build:
+    dependencies:
+        - maven-build
+    stage: image
+    image: docker:rc
+    script:
+        - docker build -t registry.7fd4d6b4-a866-4d5c-84a1-dcaa393e1139.dynatrace.training/library/sockshop/carts-0.0.1-1 .
+    artifacts:
+        paths:
+            - "/builds/ACLUser2.0/carts/"
