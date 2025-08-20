@@ -14,7 +14,7 @@ maven-build:
         - mvn -B clean package
     artifacts:
         paths:
-            - "/builds/ACLUser2.0/carts/target/"
+            - "/builds/sockshop/carts/target/"
 
 docker-buildnpush:
     dependencies:
@@ -32,4 +32,4 @@ docker-buildnpush:
         - docker push $docker_registry/carts
     artifacts:
         paths:
-            - "/builds/ACLUser2.0/carts/"
+            - "/builds/sockshop/carts/"
