@@ -28,8 +28,9 @@ docker-buildnpush:
     before_script:
         - docker info
     script:
-        - docker build -t $docker_registry/carts .
-        - docker push $docker_registry/carts
+        - docker build -t $CI_REGISTRY_IMAGE .
+        - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+        - docker push $CI_REGISTRY_IMAGE
     artifacts:
         paths:
             - "/builds/sockshop/carts/"
