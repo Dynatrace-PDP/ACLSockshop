@@ -1,6 +1,7 @@
 stages:
     - build
-    - image
+    - imageBuildAndPush
+    - deployDev
 
 variables:
   DOCKER_HOST: tcp://docker:2376
@@ -19,7 +20,7 @@ maven-build:
 docker-buildnpush:
     dependencies:
         - maven-build
-    stage: image
+    stage: imageBuildAndPush
     image: docker:24.0.5
     services:
         - name: docker:24.0.5-dind
@@ -31,6 +32,17 @@ docker-buildnpush:
         - docker build -t $CI_REGISTRY_IMAGE .
         - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
         - docker push $CI_REGISTRY_IMAGE
+        - echo "AUTH_TOKEN=$(cat ~/.docker/config.json | jq -r ‘.auths["https://index.docker.io/v1/"].auth‘)" >> auth.env
     artifacts:
-        paths:
-            - "/builds/sockshop/carts/"
+        reports:
+            dotenv: auth.env
+
+deploy-to-dev:
+    needs:
+        - docker-buildnpush
+    stage: deployDev
+    image: bitnami/kubectl:latest
+    script:
+        - kubectl create secret docker-registry regcred --docker-server=index.docker.io/v1/ --docker-username=myuser --docker-password=$AUTH_TOKEN
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE#" manifest/carts.yml'
+        - "kubectl -n dev apply -f manifest/carts.yml"
