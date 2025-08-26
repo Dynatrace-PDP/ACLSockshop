@@ -2,6 +2,7 @@ stages:
     - build
     - imageBuildAndPush
     - deployDev
+    - jmeter-test
 
 variables:
   DOCKER_HOST: tcp://docker:2376
@@ -41,16 +42,25 @@ docker-buildnpush:
             dotenv: auth.env
 
 deploy-to-dev:
-    needs:
+    dependencies:
         - docker-buildnpush
+        - maven-build
     stage: deployDev
     image: bitnami/kubectl:latest
     script:
-        - if ["$firstRun" == "yes"]; then 
-            firstRun=="nah"
-          else
-            kubectl delete secret regcred
-          fi 
         - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY/carts:$VERSION#" manifest/carts.yml'
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION #" manifest/carts.yml'
         - "kubectl -n dev apply -f manifest/carts.yml"
+        - kubectl delete secret regcred
+        - kubectl wait pod -l app=carts  -n dev --for=condition=Ready --timeout=180s
+
+jmeter-test:
+    dependencies:
+        - maven-build
+    needs:
+        - deploy-to-dev
+        - maven-build
+    stage: jmeter-test
+    image: dynatraceace/jmeter-runner:1.0.0-acl
+    script:
+        - jmeter -n -t jmeter/basiccheck.jmx -l HealthCheck_carts_dev_$VERSION -Jext_serverUrl=carts.dev -Jext_serverPort=80 -Jext_checkPath "/health" -Jext_vuCount=1 -Jext_loopCount=1 -Jext_LTN="HealthCheck_1" -Jext_funcValidation=true -Jext_avgRtValidation=0
