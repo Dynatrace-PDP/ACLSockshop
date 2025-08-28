@@ -1,52 +1,9 @@
-Primary navigation
-Homepage
-
-Project
-C
-carts
-
-Pinned
-Issues
-0
-Merge requests
-0
-
-Manage
-
-Plan
-
-Code
-
-Build
-
-Secure
-
-Deploy
-
-Operate
-
-Monitor
-
-Analyze
-
-Settings
-You can't push or pull repositories using SSH until you add an SSH key to your profile.
-sockshop
-carts
-carts
-.gitlab-ci.yml
-.gitlab-ci.yml
-ACL User's avatar
-Update .gitlab-ci.yml file
-ACL User authored 1 hour ago
-2eb43c3c
-.gitlab-ci.yml
-2.42 KiB
 stages:
     - build
     - imageBuildAndPush
     - deployDev
     - jmeter-test
+
 variables:
   DOCKER_HOST: tcp://docker:2376
   DOCKER_TLS_CERTDIR: "/certs"
@@ -63,6 +20,7 @@ maven-build:
             - "/builds/sockshop/carts/target/"
         reports:
             dotenv: vers.env
+
 docker-buildnpush:
     dependencies:
         - maven-build
@@ -82,6 +40,7 @@ docker-buildnpush:
     artifacts:
         reports:
             dotenv: auth.env
+
 deploy-to-dev:
     dependencies:
         - docker-buildnpush
@@ -89,14 +48,15 @@ deploy-to-dev:
     stage: deployDev
     image: bitnami/kubectl:latest
     script:
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY:80 --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION #" manifest/carts.yml'
+        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY:80 --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/carts.yml'
         - "kubectl -n dev apply -f manifest/carts.yml"
         - kubectl wait pod -l app=carts  -n dev --for=condition=Ready --timeout=180s
         - kubectl delete secret regcred
         - kubectl delete secret regcred -n dev
+
 jmeter-test:
     dependencies:
         - maven-build
