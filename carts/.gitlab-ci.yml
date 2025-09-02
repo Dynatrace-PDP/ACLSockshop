@@ -57,7 +57,7 @@ deploy-to-dev:
         - kubectl delete secret regcred
         - kubectl delete secret deploycred -n dev
 
-jmeter-test:
+jmeter-tests:
     dependencies:
         - maven-build
     needs:
@@ -66,5 +66,6 @@ jmeter-test:
     stage: jmeter-test
     image: dynatraceace/jmeter-runner:1.0.0-acl
     script:
-        - ls -a /jmeter/bin/
-        - /jmeter/bin/jmeter.sh -n -t jmeter/basiccheck.jmx -l HealthCheck_carts_dev_$VERSION -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="HealthCheck_1" -JTestDuration='120' -JThinkTime='250'
+        - /jmeter/bin/jmeter.sh -n -t jmeter/basiccheck.jmx -l HealthCheck_carts_dev_$VERSION -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="HealthCheck_1" -JTestDuration='120' -JThinkTime='250' > results.txt
+        - /jmeter/bin/jmeter.sh -n -t jmeter/carts_load.jmx -l FuncCheck_carts_dev_$VERSION -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="FuncCheck_1" -JTestDuration='120' -JThinkTime='250'
+        - cat results.txt
