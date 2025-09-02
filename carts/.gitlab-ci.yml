@@ -66,4 +66,5 @@ jmeter-test:
     stage: jmeter-test
     image: dynatraceace/jmeter-runner:1.0.0-acl
     script:
-        - jmeter -n -t jmeter/basiccheck.jmx -l HealthCheck_carts_dev_$VERSION -Jext_serverUrl=carts.dev -Jext_serverPort=80 -Jext_checkPath "/health" -Jext_vuCount=1 -Jext_loopCount=1 -Jext_LTN="HealthCheck_1" -Jext_funcValidation=true -Jext_avgRtValidation=0
+        - ls -a /jmeter/bin/
+        - /jmeter/bin/jmeter.sh -n -t jmeter/basiccheck.jmx -l HealthCheck_carts_dev_$VERSION -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="HealthCheck_1" -JTestDuration='120' -JThinkTime='250'
