@@ -48,14 +48,14 @@ deploy-to-dev:
     stage: deployDev
     image: bitnami/kubectl:latest
     script:
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY:80 --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY:80 --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
+        - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/carts.yml'
         - "kubectl -n dev apply -f manifest/carts.yml"
         - kubectl wait pod -l app=carts  -n dev --for=condition=Ready --timeout=180s
         - kubectl delete secret regcred
-        - kubectl delete secret regcred -n dev
+        - kubectl delete secret deploycred -n dev
 
 jmeter-test:
     dependencies:
