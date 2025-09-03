@@ -3,6 +3,10 @@ stages:
     - imageBuildAndPush
     - deployDev
     - jmeter-test
+    - dev-clean
+    - regcred-clean
+    - stag-clean
+    - deploy-clean
 
 variables:
   DOCKER_HOST: tcp://docker:2376
@@ -77,3 +81,39 @@ jmeter-tests:
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
         - if [ $RESULT != $GOAL ]; then echo "jmeter returned error" && exit 63; fi
+
+regcred-cleaner:
+    rules:
+        - when: on_failure
+    stage: regcred-clean
+    image: bitnami/kubectl:latest
+    script:
+        - kubectl delete secret regcred
+    allow_failure: true
+
+deploy-cleaner:
+    rules:
+        - when: on_failure
+    stage: deploy-clean
+    image: bitnami/kubectl:latest
+    script:
+        - kubectl delete secret deploycred -n dev
+    allow_failure: true
+
+dev-cleaner:
+    rules:
+        - when: on_failure
+    stage: dev-clean
+    image: bitnami/kubectl:latest
+    script:
+        - "kubectl -n dev delete -f manifest/carts.yml"
+    allow_failure: true
+
+staging-cleaner:
+    rules:
+        - when: on_failure
+    stage: stag-clean
+    image: bitnami/kubectl:latest
+    script:
+        - "kubectl -n staging delete -f manifest/carts.yml"
+    allow_failure: true
