@@ -8,12 +8,12 @@ ENV    SERVICE_USER=myuser \
 RUN addgroup --gid ${SERVICE_GID} ${SERVICE_GROUP} && adduser --ingroup ${SERVICE_GROUP} --shell /sbin/nologin --uid ${SERVICE_UID} ${SERVICE_USER}
 
 WORKDIR /
-COPY ./catalogue /catalogue
+COPY ./src/github.com/dynatrace-sockshop/catalogue/ /catalogue
 COPY ./images/ /images/
 
-RUN    chmod +x /catalogue && \
-    chown -R ${SERVICE_USER}:${SERVICE_GROUP} /catalogue /images && \
-    setcap 'cap_net_bind_service=+ep' /catalogue
+RUN    chmod +x /catalogue
+RUN    chown -R ${SERVICE_USER}:${SERVICE_GROUP} /catalogue /images
+RUN    setcap 'cap_net_bind_service=+ep' /catalogue/catalogue
 
 ENV APP_PORT 8080
 #ENV DB_DSN "catalogue_user:default_password@tcp(sockshop-catalogue-db.ckbkxcwrvff7.eu-west-1.rds.amazonaws.com:3306)/catalogue_db"
@@ -35,5 +35,5 @@ LABEL org.label-schema.vendor="Dynatrace" \
   org.label-schema.vcs-ref="${COMMIT}" \
   org.label-schema.schema-version="1.0"
 
-CMD ["/catalogue", "-port=8080"]
+CMD ["/catalogue/catalogue", "-port=8080"]
 EXPOSE 8080
