@@ -4,10 +4,12 @@ stages:
     - deployDev
     - jmeter-test
     - imageBuildAndPushStaging
+    - deployStag
     - dev-clean
     - regcred-clean
     - stag-clean
     - deploy-clean
+    - deploy-stag-clean
 
 variables:
   DOCKER_HOST: tcp://docker:2376
@@ -83,7 +85,7 @@ jmeter-tests:
         - RESULT=$(awk '/Err:\s*/{print $15}' Funcresults.txt)
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
-#        - if [ $RESULT != $GOAL ]; then echo "jmeter returned error" && exit 63; fi
+        - if [ $RESULT != $GOAL ]; then echo "jmeter returned error" && exit 63; fi
 
 docker-buildnpush-staging:
     dependencies:
@@ -104,6 +106,24 @@ docker-buildnpush-staging:
         - docker push $CI_REGISTRY_IMAGE:$VERSION
         - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
 
+deploy-to-staging:
+    dependencies:
+        - docker-buildnpush
+        - docker-buildnpush-staging
+        - maven-build
+    stage: deployStag
+    image: bitnami/kubectl:latest
+    script:
+        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
+        - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/carts.yml'
+        - 'sed -i "s#namespace: .*#namespace: staging#" manifest/carts.yml'
+        - "kubectl -n staging apply -f manifest/carts.yml"
+        - kubectl wait pod -l app=carts  -n staging --for=condition=Ready --timeout=300s
+        - kubectl delete secret regcred
+        - kubectl delete secret deploycred -n staging
+
 regcred-cleaner:
     rules:
         - when: on_failure
@@ -122,14 +142,32 @@ deploy-cleaner:
         - kubectl delete secret deploycred -n dev
     allow_failure: true
 
-dev-cleaner:
+deploy-stag-cleaner:
     rules:
         - when: on_failure
+    stage: deploy-stag-clean
+    image: bitnami/kubectl:latest
+    script:
+        - kubectl delete secret deploycred -n staging
+    allow_failure: true
+
+.dev-cleaner: &dev-cleaner
     stage: dev-clean
     image: bitnami/kubectl:latest
     script:
         - "kubectl -n dev delete -f manifest/carts.yml"
     allow_failure: true
+
+cleanup_dev_failure:
+    rules:
+    - when: on_failure
+    <<: *dev-cleaner
+
+cleanup_dev_success:
+    rules:
+    - when: on_success
+    needs: ["deploy-to-staging"]
+    <<: *dev-cleaner
 
 staging-cleaner:
     rules:
