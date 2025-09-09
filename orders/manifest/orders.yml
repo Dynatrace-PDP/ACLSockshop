@@ -58,6 +58,9 @@ spec:
             medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
+      imagePullSecrets:
+      - name: deploycred
+
 ---
 apiVersion: v1
 kind: Service

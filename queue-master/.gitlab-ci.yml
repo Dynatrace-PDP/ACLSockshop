@@ -17,23 +17,15 @@ variables:
   DOCKER_TLS_VERIFY: 1
   DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
 
-go-build:
+maven-build:
     stage: build
-    image: dynatraceacm/gobuilder
+    image: maven:3.3.9-jdk-8-alpine
     script:
-        - export GOPATH=$PWD
-        - mkdir -p src/github.com/dynatrace-sockshop/catalogue/
-        - cp -R ./api src/github.com/dynatrace-sockshop/catalogue/
-        - cp -R ./main.go src/github.com/dynatrace-sockshop/catalogue/
-        - cp -R ./glide.* src/github.com/dynatrace-sockshop/catalogue/
-        - cd src/github.com/dynatrace-sockshop/catalogue
-        - glide install
-        - go build -a -ldflags -linkmode=external -installsuffix cgo -o ./catalogue main.go
-        - cd /builds/sockshop/catalogue/
+        - mvn -B clean package
         - echo "VERSION=$(cat version)" > vers.env
     artifacts:
         paths:
-            - "/builds/sockshop/catalogue/src/github.com/dynatrace-sockshop/catalogue/"
+            - "/builds/sockshop/queue-master/target/"
         reports:
             dotenv: vers.env
 
@@ -44,11 +36,11 @@ dt-event-push:
     image: alpine/curl:8.14.1
     script:        
         - |
-          curl -X "POST" "https://$DT_TENANT_UUID.live.dynatrace.com/api/v2/events/ingest" --header "accept: application/json; charset=utf-8" --header "Authorization: Api-Token $DT_ACCESS_TOKEN" --header "Content-Type: application/json; charset=utf-8" --data '{ "entitySelector": "type(SERVICE),tag(app:catalogue),tag(environment:dev)", "eventType": "CUSTOM_INFO", "properties": { "Gitlab Build Number": "$CI_PIPELINE_IID", "Git commit": "$CI_COMMIT_MESSAGE" }, "title": "Deployment Event" }'
+          curl -X "POST" "https://$DT_TENANT_UUID.live.dynatrace.com/api/v2/events/ingest" --header "accept: application/json; charset=utf-8" --header "Authorization: Api-Token $DT_ACCESS_TOKEN" --header "Content-Type: application/json; charset=utf-8" --data '{ "entitySelector": "type(SERVICE),tag(app:queue-master),tag(environment:dev)", "eventType": "CUSTOM_INFO", "properties": { "Gitlab Build Number": "$CI_PIPELINE_IID", "Git commit": "$CI_COMMIT_MESSAGE" }, "title": "Deployment Event" }'
 
 docker-buildnpush:
     dependencies:
-        - go-build
+        - maven-build
     stage: imageBuildAndPush
     image: docker:24.0.5
     services:
@@ -58,7 +50,6 @@ docker-buildnpush:
     before_script:
         - docker info
     script:
-        - ls
         - docker build -t $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID .
         - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
         - docker push $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID
@@ -71,35 +62,35 @@ docker-buildnpush:
 deploy-to-dev:
     dependencies:
         - docker-buildnpush
-        - go-build
+        - maven-build
     stage: deployDev
     image: bitnami/kubectl:latest
     script:
         - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
         - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID#" manifest/catalogue.yml'
-        - "kubectl -n dev apply -f manifest/catalogue.yml"
-        - kubectl wait pod -l app=catalogue  -n dev --for=condition=Ready --timeout=300s
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID#" manifest/queue-master.yml'
+        - "kubectl -n dev apply -f manifest/queue-master.yml"
+        - kubectl wait pod -l app=queue-master  -n dev --for=condition=Ready --timeout=300s
         - kubectl delete secret regcred
         - kubectl delete secret deploycred -n dev
 
 jmeter-tests:
     dependencies:
-        - go-build
+        - maven-build
     needs:
         - deploy-to-dev
-        - go-build
+        - maven-build
     stage: jmeter-test
     image: dynatraceace/jmeter-runner:1.0.0-acl
     script:
-        - /jmeter/bin/jmeter.sh -n -t jmeter/basiccheck.jmx -l HealthCheck_catalogue_dev_$VERSION-$CI_PIPELINE_IID -JSERVER_URL=catalogue.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="HealthCheck_1" -JTestDuration='120' -JThinkTime='250' > Basicresults.txt
+        - /jmeter/bin/jmeter.sh -n -t jmeter/basiccheck.jmx -l HealthCheck_queue-master_dev_$VERSION-$CI_PIPELINE_IID -JSERVER_URL=queue-master.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="HealthCheck_1" -JTestDuration='120' -JThinkTime='250' > Basicresults.txt
         - RESULT=$(awk '/Err:\s*/{print $15}' Basicresults.txt)
         - GOAL="0"
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
         - if [ $RESULT != $GOAL ]; then echo "jmeter returned error" && exit 63; fi
-        - /jmeter/bin/jmeter.sh -n -t jmeter/catalogue_load.jmx -l FuncCheck_catalogue_dev_$VERSION-$CI_PIPELINE_IID -JSERVER_URL=catalogue.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="FuncCheck_1" -JTestDuration='120' -JThinkTime='250' > Funcresults.txt
+        - /jmeter/bin/jmeter.sh -n -t jmeter/queue-master_load.jmx -l FuncCheck_queue-master_dev_$VERSION-$CI_PIPELINE_IID -JSERVER_URL=queue-master.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="FuncCheck_1" -JTestDuration='120' -JThinkTime='250' > Funcresults.txt
         - RESULT=$(awk '/Err:\s*/{print $15}' Funcresults.txt)
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
@@ -108,7 +99,7 @@ jmeter-tests:
 docker-buildnpush-staging:
     dependencies:
         - jmeter-tests
-        - go-build
+        - maven-build
     stage: imageBuildAndPushStaging
     image: docker:24.0.5
     services:
@@ -128,17 +119,17 @@ deploy-to-staging:
     dependencies:
         - docker-buildnpush
         - docker-buildnpush-staging
-        - go-build
+        - maven-build
     stage: deployStag
     image: bitnami/kubectl:latest
     script:
         - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
         - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/catalogue.yml'
-        - 'sed -i "s#namespace: .*#namespace: staging#" manifest/catalogue.yml'
-        - "kubectl -n staging apply -f manifest/catalogue.yml"
-        - kubectl wait pod -l app=catalogue  -n staging --for=condition=Ready --timeout=300s
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/queue-master.yml'
+        - 'sed -i "s#namespace: .*#namespace: staging#" manifest/queue-master.yml'
+        - "kubectl -n staging apply -f manifest/queue-master.yml"
+        - kubectl wait pod -l app=queue-master  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret regcred
         - kubectl delete secret deploycred -n staging
 
@@ -175,5 +166,5 @@ staging-cleaner:
     stage: stag-clean
     image: bitnami/kubectl:latest
     script:
-        - "kubectl -n staging delete -f manifest/catalogue.yml"
+        - "kubectl -n staging delete -f manifest/queue-master.yml"
     allow_failure: true

@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 WORKDIR /
-COPY ./payment /payment
+COPY ./src/github.com/dynatrace-sockshop/payment/ /payment
 
 ENV APP_PORT 8080
 
@@ -19,5 +19,5 @@ LABEL org.label-schema.vendor="Dynatrace" \
   org.label-schema.vcs-ref="${COMMIT}" \
   org.label-schema.schema-version="1.0"
 
-CMD ["/payment", "-port=8080"]
+CMD ["/payment/payment", "-port=8080"]
 EXPOSE 8080

@@ -8,7 +8,7 @@ ENV    SERVICE_USER=myuser \
 RUN addgroup --gid ${SERVICE_GID} ${SERVICE_GROUP} && adduser --ingroup ${SERVICE_GROUP} --shell /sbin/nologin --uid ${SERVICE_UID} ${SERVICE_USER}
 
 WORKDIR /
-COPY ./user /user
+COPY ./src/github.com/dynatrace-sockshop/user /user
 
 RUN	chmod +x /user && \
 	chown -R ${SERVICE_USER}:${SERVICE_GROUP} /user && \
@@ -37,5 +37,5 @@ LABEL org.label-schema.vendor="Dynatrace" \
   org.label-schema.vcs-ref="${COMMIT}" \
   org.label-schema.schema-version="1.0"
 
-CMD ["/user", "-port=8080"]
+CMD ["/user/user", "-port=8080"]
 EXPOSE 8080

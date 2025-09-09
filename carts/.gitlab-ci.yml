@@ -2,6 +2,7 @@ stages:
     - build
     - imageBuildAndPush
     - deployDev
+    - dt-event
     - jmeter-test
     - imageBuildAndPushStaging
     - deployStag
@@ -27,6 +28,15 @@ maven-build:
             - "/builds/sockshop/carts/target/"
         reports:
             dotenv: vers.env
+
+dt-event-push:
+    stage: dt-event
+    dependencies:
+        - "deploy-to-dev"
+    image: alpine/curl:8.14.1
+    script:        
+        - |
+          curl -X "POST" "https://$DT_TENANT_UUID.live.dynatrace.com/api/v2/events/ingest" --header "accept: application/json; charset=utf-8" --header "Authorization: Api-Token $DT_ACCESS_TOKEN" --header "Content-Type: application/json; charset=utf-8" --data '{ "entitySelector": "type(SERVICE),tag(app:carts),tag(environment:dev)", "eventType": "CUSTOM_INFO", "properties": { "Gitlab Build Number": "$CI_PIPELINE_IID", "Git commit": "$CI_COMMIT_MESSAGE" }, "title": "Deployment Event" }'
 
 docker-buildnpush:
     dependencies:
