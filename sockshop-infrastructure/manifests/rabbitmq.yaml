@@ -139,7 +139,7 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-  namespace: production
+  namespace: prod
 spec:
   replicas: 1
   selector:
@@ -184,7 +184,7 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-  namespace: production
+  namespace: prod
 spec:
   ports:
     # the port that this service should serve on

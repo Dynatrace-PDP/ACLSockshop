@@ -91,7 +91,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-  namespace: production
+  namespace: prod
 spec:
   replicas: 1
   selector:
@@ -120,7 +120,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-  namespace: production
+  namespace: prod
 spec:
   ports:
   - port: 3306
