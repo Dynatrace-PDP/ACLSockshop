@@ -66,14 +66,14 @@ deploy-to-dev:
     stage: deployDev
     image: bitnami/kubectl:latest
     script:
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry queuemasterregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
+        - kubectl create secret docker-registry queuemasterdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID#" manifest/queue-master.yml'
         - "kubectl -n dev apply -f manifest/queue-master.yml"
         - kubectl wait pod -l app=queue-master  -n dev --for=condition=Ready --timeout=300s
-        - kubectl delete secret regcred
-        - kubectl delete secret deploycred -n dev
+        - kubectl delete secret queuemasterregcred
+        - kubectl delete secret queuemasterdeploycred -n dev
 
 jmeter-tests:
     dependencies:
@@ -123,15 +123,15 @@ deploy-to-staging:
     stage: deployStag
     image: bitnami/kubectl:latest
     script:
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry queuemasterregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
+        - kubectl create secret docker-registry queuemasterdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/queue-master.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/queue-master.yml'
         - "kubectl -n staging apply -f manifest/queue-master.yml"
         - kubectl wait pod -l app=queue-master  -n staging --for=condition=Ready --timeout=300s
-        - kubectl delete secret regcred
-        - kubectl delete secret deploycred -n staging
+        - kubectl delete secret queuemasterregcred
+        - kubectl delete secret queuemasterdeploycred -n staging
 
 regcred-cleaner:
     rules:
@@ -139,7 +139,7 @@ regcred-cleaner:
     stage: regcred-clean
     image: bitnami/kubectl:latest
     script:
-        - kubectl delete secret regcred
+        - kubectl delete secret queuemasterregcred
     allow_failure: true
 
 deploy-cleaner:
@@ -148,7 +148,7 @@ deploy-cleaner:
     stage: deploy-clean
     image: bitnami/kubectl:latest
     script:
-        - kubectl delete secret deploycred -n dev
+        - kubectl delete secret queuemasterdeploycred -n dev
     allow_failure: true
 
 deploy-stag-cleaner:
@@ -157,7 +157,7 @@ deploy-stag-cleaner:
     stage: deploy-stag-clean
     image: bitnami/kubectl:latest
     script:
-        - kubectl delete secret deploycred -n staging
+        - kubectl delete secret queuemasterdeploycred -n staging
     allow_failure: true
 
 staging-cleaner:

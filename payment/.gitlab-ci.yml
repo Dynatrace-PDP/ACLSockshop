@@ -75,14 +75,14 @@ deploy-to-dev:
     stage: deployDev
     image: bitnami/kubectl:latest
     script:
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry paymentregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
+        - kubectl create secret docker-registry paymentdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID#" manifest/payment.yml'
         - "kubectl -n dev apply -f manifest/payment.yml"
         - kubectl wait pod -l app=payment  -n dev --for=condition=Ready --timeout=300s
-        - kubectl delete secret regcred
-        - kubectl delete secret deploycred -n dev
+        - kubectl delete secret paymentregcred
+        - kubectl delete secret paymentdeploycred -n dev
 
 jmeter-tests:
     dependencies:
@@ -132,15 +132,15 @@ deploy-to-staging:
     stage: deployStag
     image: bitnami/kubectl:latest
     script:
-        - kubectl create secret docker-registry regcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry paymentregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry deploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
+        - kubectl create secret docker-registry paymentdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/payment.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/payment.yml'
         - "kubectl -n staging apply -f manifest/payment.yml"
         - kubectl wait pod -l app=payment  -n staging --for=condition=Ready --timeout=300s
-        - kubectl delete secret regcred
-        - kubectl delete secret deploycred -n staging
+        - kubectl delete secret paymentregcred
+        - kubectl delete secret paymentdeploycred -n staging
 
 regcred-cleaner:
     rules:
@@ -148,7 +148,7 @@ regcred-cleaner:
     stage: regcred-clean
     image: bitnami/kubectl:latest
     script:
-        - kubectl delete secret regcred
+        - kubectl delete secret paymentregcred
     allow_failure: true
 
 deploy-cleaner:
@@ -157,7 +157,7 @@ deploy-cleaner:
     stage: deploy-clean
     image: bitnami/kubectl:latest
     script:
-        - kubectl delete secret deploycred -n dev
+        - kubectl delete secret paymentdeploycred -n dev
     allow_failure: true
 
 deploy-stag-cleaner:
@@ -166,7 +166,7 @@ deploy-stag-cleaner:
     stage: deploy-stag-clean
     image: bitnami/kubectl:latest
     script:
-        - kubectl delete secret deploycred -n staging
+        - kubectl delete secret paymentdeploycred -n staging
     allow_failure: true
 
 staging-cleaner:

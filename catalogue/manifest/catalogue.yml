@@ -57,7 +57,7 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
       imagePullSecrets:
-      - name: deploycred
+      - name: cataloguedeploycred
 
 ---
 apiVersion: v1
