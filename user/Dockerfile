@@ -37,5 +37,5 @@ LABEL org.label-schema.vendor="Dynatrace" \
   org.label-schema.vcs-ref="${COMMIT}" \
   org.label-schema.schema-version="1.0"
 
-CMD ["/user/user", "-port=8080"]
+CMD ["/user", "-port=8080"]
 EXPOSE 8080

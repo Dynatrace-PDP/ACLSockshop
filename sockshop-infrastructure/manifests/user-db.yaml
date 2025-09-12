@@ -31,7 +31,7 @@ spec:
         name: user-db
     spec:
       containers:
-      - image: mongo
+      - image: mongo:4.4
         name: user-db
         ports:
         - containerPort: 27017
@@ -90,7 +90,7 @@ spec:
         name: user-db
     spec:
       containers:
-      - image: mongo
+      - image: mongo:4.4
         name: user-db
         ports:
         - containerPort: 27017
@@ -149,7 +149,7 @@ spec:
         name: user-db
     spec:
       containers:
-      - image: mongo
+      - image: mongo:4.4
         name: user-db
         ports:
         - containerPort: 27017
