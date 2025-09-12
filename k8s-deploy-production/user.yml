@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: user-v1
-  namespace: production
+  namespace: prod
 spec:
   replicas: 1
   selector:
@@ -56,6 +56,8 @@ spec:
             medium: Memory
       nodeSelector:
         beta.kubernetes.io/os: linux
+      imagePullSecrets:
+      - name: proddeploycred
 ---
 apiVersion: v1
 kind: Service

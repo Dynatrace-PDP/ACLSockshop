@@ -31,7 +31,7 @@ spec:
           name: carts-db
       spec:
         containers:
-        - image: mongo
+        - image: mongo:4.4
           name: carts-db
           ports:
           - containerPort: 27017
@@ -90,7 +90,7 @@ spec:
           name: carts-db
       spec:
         containers:
-        - image: mongo
+        - image: mongo:4.4
           name: carts-db
           ports:
           - containerPort: 27017
@@ -149,7 +149,7 @@ spec:
         name: carts-db
     spec:
       containers:
-      - image: mongo
+      - image: mongo:4.4
         name: carts-db
         ports:
         - containerPort: 27017

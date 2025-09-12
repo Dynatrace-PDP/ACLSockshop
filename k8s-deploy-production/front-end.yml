@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: front-end-v1
-  namespace: production
+  namespace: prod
 spec:
   replicas: 1
   selector:
@@ -50,6 +50,8 @@ spec:
           timeoutSeconds: 1
       nodeSelector:
         beta.kubernetes.io/os: linux
+      imagePullSecrets:
+      - name: proddeploycred
 
 ---
 apiVersion: v1

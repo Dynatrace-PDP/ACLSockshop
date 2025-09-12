@@ -77,4 +77,3 @@ spec:
     targetPort: 8080
   selector:
     app: carts
-  type: LoadBalancer

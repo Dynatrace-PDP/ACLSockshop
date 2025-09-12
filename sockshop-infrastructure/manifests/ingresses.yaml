@@ -1,0 +1,151 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.provider: traefik
+    traefik.ingress.kubernetes.io/forwarded-proto: https
+  labels:
+    app: front-end
+  name: front-end-dev
+  namespace: dev
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: front-end.dev.a8cfccc8-ace9-4186-9308-3dd2022df5b6.dynatrace.training
+    http:
+      paths:
+      - backend:
+          service:
+            name: front-end
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.provider: traefik
+    traefik.ingress.kubernetes.io/forwarded-proto: https
+  labels:
+    app: front-end
+  name: front-end-staging
+  namespace: staging
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: front-end.staging.a8cfccc8-ace9-4186-9308-3dd2022df5b6.dynatrace.training
+    http:
+      paths:
+      - backend:
+          service:
+            name: front-end
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.provider: traefik
+    traefik.ingress.kubernetes.io/forwarded-proto: https
+  labels:
+    app: front-end
+  name: front-end-prod
+  namespace: prod
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: front-end.prod.a8cfccc8-ace9-4186-9308-3dd2022df5b6.dynatrace.training
+    http:
+      paths:
+      - backend:
+          service:
+            name: front-end
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.provider: traefik
+    traefik.ingress.kubernetes.io/forwarded-proto: https
+  labels:
+    app: carts
+  name: carts-dev
+  namespace: dev
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: carts.dev.a8cfccc8-ace9-4186-9308-3dd2022df5b6.dynatrace.training
+    http:
+      paths:
+      - backend:
+          service:
+            name: carts
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.provider: traefik
+    traefik.ingress.kubernetes.io/forwarded-proto: https
+  labels:
+    app: carts
+  name: carts-staging
+  namespace: staging
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: carts.staging.a8cfccc8-ace9-4186-9308-3dd2022df5b6.dynatrace.training
+    http:
+      paths:
+      - backend:
+          service:
+            name: carts
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.provider: traefik
+    traefik.ingress.kubernetes.io/forwarded-proto: https
+  labels:
+    app: carts
+  name: carts-prod
+  namespace: prod
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: carts.prod.a8cfccc8-ace9-4186-9308-3dd2022df5b6.dynatrace.training
+    http:
+      paths:
+      - backend:
+          service:
+            name: carts
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+
