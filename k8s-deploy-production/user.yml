@@ -65,7 +65,7 @@ metadata:
   name: user
   labels:
     app: user
-  namespace: production
+  namespace: prod
 spec:
   ports:
   - name: http

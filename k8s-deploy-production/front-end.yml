@@ -60,7 +60,7 @@ metadata:
   name: front-end
   labels:
     app: front-end
-  namespace: production
+  namespace: prod
 spec:
   ports:
   - name: http

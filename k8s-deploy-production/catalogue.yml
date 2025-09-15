@@ -65,7 +65,7 @@ metadata:
   name: catalogue
   labels:
     app: catalogue
-  namespace: production
+  namespace: prod
 spec:
   ports:
   - name: http

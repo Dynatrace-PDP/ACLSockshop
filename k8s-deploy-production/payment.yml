@@ -65,7 +65,7 @@ metadata:
   name: payment
   labels:
     app: payment
-  namespace: production
+  namespace: prod
 spec:
   ports:
   - name: http

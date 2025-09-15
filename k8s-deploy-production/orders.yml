@@ -67,7 +67,7 @@ metadata:
   name: orders
   labels:
     app: orders
-  namespace: production
+  namespace: prod
 spec:
   ports:
   - name: http
