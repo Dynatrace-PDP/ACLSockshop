@@ -100,12 +100,12 @@ jmeter-tests:
         - GOAL="0"
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
-        - if [ $RESULT != $GOAL ]; then echo "jmeter returned error" && exit 63; fi
+        - if [ $RESULT != $GOAL ]; then cat BasicResults.txt && echo "jmeter returned error" && exit 63; fi
         - /jmeter/bin/jmeter.sh -n -t jmeter/user_load.jmx -l FuncCheck_user_dev_$VERSION-$CI_PIPELINE_IID -JSERVER_URL=user.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="FuncCheck_1" -JTestDuration='120' -JThinkTime='250' > Funcresults.txt
         - RESULT=$(awk '/Err:\s*/{print $15}' Funcresults.txt)
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
-        - if [ $RESULT != $GOAL ]; then echo "jmeter returned error" && exit 63; fi
+        - if [ $RESULT != $GOAL ]; then cat FuncResults.txt && echo "jmeter returned error" && exit 63; fi
 
 docker-buildnpush-staging:
     dependencies:
