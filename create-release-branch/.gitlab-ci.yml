@@ -1,0 +1,7 @@
+spec:
+  inputs:
+    SERVICE:
+---
+scan-website:
+  stage: $[[ inputs.service ]]
+  script: 

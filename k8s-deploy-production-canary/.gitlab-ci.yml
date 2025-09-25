@@ -1,0 +1,9 @@
+spec:
+  inputs:
+    VERSION1:
+    VERSION2:
+    REMEDIATIONURL:
+---
+scan-website:
+  stage: $[[ inputs.service ]]
+  script: ./scan-website $[[ inputs.version ]]
