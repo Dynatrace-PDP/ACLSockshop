@@ -1,8 +1,8 @@
 spec:
   inputs:
-    service:
+    SERVICE:
        description: "The Service that should be updated and promoted to prod"
-    version:
+    VERSION:
        description: "The Version that the Service is being updated to"
 
 ---
@@ -14,8 +14,8 @@ kube-prod-update:
     image: bitnami/kubectl:latest
     script:
         - ls
-        - SERVICE=$(echo "$[[ inputs.service ]]")
-        - VERSION=$(echo "$[[ inputs.version ]]")
+        - SERVICE=$(echo "$[[ inputs.SERVICE ]]")
+        - VERSION=$(echo "$[[ inputs.VERSION ]]")
         # update images
         - | 
            sed -i "s#image: .*#image: `kubectl -n staging get deployment -o jsonpath='{.items[*].spec.template.spec.containers[0].image}' --field-selector=metadata.name=$SERVICE`#" $SERVICE.yml
@@ -27,3 +27,14 @@ kube-prod-update:
            sed -i "s#  name: $SERVICE-v1#  name: $SERVICE-$VERSION#" $SERVICE.yml
         - |
            kubectl apply -f $SERVICE.yml
+
+dt-event-push:
+    stage: dt-event
+    dependencies:
+        - "kube-prod-update"
+    image: alpine/curl:8.14.1
+    script:
+        - SERVICE=$(echo "$[[ inputs.SERVICE ]]")
+        - VERSION=$(echo "$[[ inputs.VERSION ]]")           
+        - |
+          curl -X "POST" "https://$DT_TENANT_UUID.live.dynatrace.com/api/v2/events/ingest" --header "accept: application/json; charset=utf-8" --header "Authorization: Api-Token $DT_ACCESS_TOKEN" --header "Content-Type: application/json; charset=utf-8" --data '{ "entitySelector": "type(SERVICE),tag(app:$SERVICE),tag(environment:prod)",  "eventType": "CUSTOM_INFO", "properties": { "Build Number": "$VERSION" }, "title": "Deployment Event" }'

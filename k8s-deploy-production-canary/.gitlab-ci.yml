@@ -1,9 +1,38 @@
 spec:
   inputs:
     VERSION1:
+      description: 'Percentage of traffic to be routed to version 1'
     VERSION2:
+      description: 'Percentage of traffic to be routed to version 2'
     REMEDIATIONURL:
+      description: 'Remediation script to call if canary release fails'
 ---
-scan-website:
-  stage: $[[ inputs.service ]]
-  script: ./scan-website $[[ inputs.version ]]
+stages:
+   - prod-update-canary
+   - dt-event
+
+kube-prod-update:
+    stage: prod-update-canary
+    image: bitnami/kubectl:latest
+    script:
+          - VERSION1=$(echo "$[[ inputs.VERSION1 ]]")
+          - VERSION2=$(echo "$[[ inputs.VERSION2 ]]")
+          - |
+             sed -i \"s~weight: .* #v1~weight: $VERSION1 #v1~\" istio/virtual_service_canary.yml
+          - |
+             sed -i \"s~weight: .* #v2~weight: $VERSION2 #v2~\" istio/virtual_service_canary.yml
+          - cat istio/virtual_service_canary.yml
+          - kubectl apply -f istio/virtual_service_canary.yml -n default
+          - kubectl describe virtualservices sockshop -n default
+
+dt-event-push:
+    stage: dt-event
+    dependencies:
+        - "kube-prod-update"
+    image: alpine/curl:8.14.1
+    script:
+        - VERSION1=$(echo "$[[ inputs.VERSION1 ]]")
+        - VERSION2=$(echo "$[[ inputs.VERSION2 ]]")  
+        - REMIDIATIONURL=$(echo "$[[ inputs.REMEDIATIONURL ]]")          
+        - |
+          curl -X "POST" "https://$DT_TENANT_UUID.live.dynatrace.com/api/v2/events/ingest" --header "accept: application/json; charset=utf-8" --header "Authorization: Api-Token $DT_ACCESS_TOKEN" --header "Content-Type: application/json; charset=utf-8" --data '{ "entitySelector": "type(SERVICE),tag(app:front-end),tag(environment:prod)", "description": "Load balancing changed to: v1 $VERSION1 % ; v2 $VERSION2 %", "source": "Jenkins", "configuration": "Load Balancer", "eventType": "CUSTOM_INFO", "properties": { "remediationAction": "$REMEDIATIONURL" }, "title": "Configuration Event" }'
