@@ -2,6 +2,21 @@ spec:
   inputs:
     SERVICE:
 ---
-scan-website:
-  stage: $[[ inputs.service ]]
+stages:
+  - release
+
+create-release-branch0-:
+  stage: release
   script: 
+    - SERVICE=$(echo "$[[ inputs.SERVICE ]]")
+    - git config --global user.email ${env.GITHUB_USER_EMAIL}
+    - git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@$GITLAB_URL/$SERVICE
+    - version=`cat $SERVICE/version`
+    - cd $SERVICE/ && git checkout -b release/`cat version`
+    - cd $SERVICE/ && git push --set-upstream https://${GIT_USERNAME}:${GIT_PASSWORD}@$GITLAB_URL/$SERVICE release/`cat version`
+    - cd $SERVICE/ && git checkout master
+    - cp increment_version.sh $SERVICE/ && chmod +x $SERVICE/increment_version.sh
+    - cd $SERVICE/ && sh increment_version.sh
+    - cd $SERVICE/ && git add version
+    - cd $SERVICE/ && git commit -am 'Bumped up version'
+    - cd $SERVICE/ && git push https://${GIT_USERNAME}:${GIT_PASSWORD}@$GITLAB_URL/$SERVICE

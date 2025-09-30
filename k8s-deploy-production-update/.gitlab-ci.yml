@@ -8,6 +8,7 @@ spec:
 ---
 stages:
    - prod-update
+   - dt-event
 
 kube-prod-update:
     stage: prod-update
