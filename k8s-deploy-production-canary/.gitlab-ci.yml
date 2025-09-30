@@ -13,7 +13,7 @@ stages:
 
 kube-prod-update:
     stage: prod-update-canary
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
           - VERSION1=$(echo "$[[ inputs.VERSION1 ]]")
           - VERSION2=$(echo "$[[ inputs.VERSION2 ]]")

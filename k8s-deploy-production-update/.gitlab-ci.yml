@@ -12,7 +12,7 @@ stages:
 
 kube-prod-update:
     stage: prod-update
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
         - ls
         - SERVICE=$(echo "$[[ inputs.SERVICE ]]")

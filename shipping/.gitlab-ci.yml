@@ -64,7 +64,7 @@ deploy-to-dev:
         - docker-buildnpush
         - maven-build
     stage: deployDev
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
         - kubectl create secret docker-registry shippingregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
@@ -121,7 +121,7 @@ deploy-to-staging:
         - docker-buildnpush-staging
         - maven-build
     stage: deployStag
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
         - kubectl create secret docker-registry shippingregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
@@ -137,7 +137,7 @@ regcred-cleaner:
     rules:
         - when: on_failure
     stage: regcred-clean
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
         - kubectl delete secret shippingregcred
     allow_failure: true
@@ -146,7 +146,7 @@ deploy-cleaner:
     rules:
         - when: on_failure
     stage: deploy-clean
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
         - kubectl delete secret shippingdeploycred -n dev
     allow_failure: true
@@ -155,7 +155,7 @@ deploy-stag-cleaner:
     rules:
         - when: on_failure
     stage: deploy-stag-clean
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
         - kubectl delete secret shippingdeploycred -n staging
     allow_failure: true
@@ -164,7 +164,7 @@ staging-cleaner:
     rules:
         - when: on_failure
     stage: stag-clean
-    image: bitnami/kubectl:latest
+    image: alpine/kubectl:latest
     script:
         - "kubectl -n staging delete -f manifest/shipping.yml"
     allow_failure: true
