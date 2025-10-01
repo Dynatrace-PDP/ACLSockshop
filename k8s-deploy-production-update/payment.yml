@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment-v1
+  name: payment
   namespace: prod
 spec:
   replicas: 1

@@ -68,9 +68,9 @@ spec:
       paths:
       - backend:
           service:
-            name: front-end
+            name: front-end-v1
             port:
-              number: 80
+              number: 8080
         path: /
         pathType: Prefix
 ---

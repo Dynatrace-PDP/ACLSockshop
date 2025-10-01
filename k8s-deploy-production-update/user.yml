@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-v1
+  name: user
   namespace: prod
 spec:
   replicas: 1
