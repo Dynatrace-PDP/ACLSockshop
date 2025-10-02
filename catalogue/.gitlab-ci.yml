@@ -119,7 +119,9 @@ docker-buildnpush-staging:
         - docker info
     script:
         - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-        - docker pull $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID
+        - IMAGE_REPO=$(echo "$CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID")
+        - IMAGE_REPO=$(echo "$IMAGE_REPO")
+        - docker pull $IMAGE_REPO
         - docker tag $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$VERSION
         - docker push $CI_REGISTRY_IMAGE:$VERSION
         - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
@@ -138,6 +140,7 @@ deploy-to-staging:
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION#" manifest/catalogue.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/catalogue.yml'
         - "kubectl -n staging apply -f manifest/catalogue.yml"
+        - kubectl delete pod -l app=catalogue -n staging
         - kubectl wait pod -l app=catalogue  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret catalogueregcred
         - kubectl delete secret cataloguedeploycred -n staging
