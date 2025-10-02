@@ -141,7 +141,7 @@ deploy-to-staging:
         - kubectl create secret docker-registry userregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
         - kubectl create secret docker-registry userdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
-        - 'sed -i "s#image: .*#image:$CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release#" manifest/user.yml'
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release#" manifest/user.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/user.yml'
         - kubectl delete pod -l app=user -n staging
         - "kubectl -n staging apply -f manifest/user.yml"
