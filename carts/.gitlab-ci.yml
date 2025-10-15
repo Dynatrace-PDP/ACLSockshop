@@ -5,6 +5,7 @@ stages:
     - dt-event
     - jmeter-test
     - imageBuildAndPushStaging
+    - release
     - deployStag
     - regcred-clean
     - stag-clean
@@ -22,12 +23,9 @@ maven-build:
     image: maven:3.3.9-jdk-8-alpine
     script:
         - mvn -B clean package
-        - echo "VERSION=$(cat version)" > vers.env
     artifacts:
         paths:
             - "/builds/sockshop/carts/target/"
-        reports:
-            dotenv: vers.env
 
 dt-event-push:
     stage: dt-event
@@ -50,11 +48,9 @@ docker-buildnpush:
     before_script:
         - docker info
     script:
-        - docker build -t $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID .
+        - docker build -t $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID .
         - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-        - docker push $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID
-        - docker tag $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-dev
-        - docker push $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-dev
+        - docker push $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID
         - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
         - echo "$CI_PIPELINE_IID"
     artifacts:
@@ -71,7 +67,7 @@ deploy-to-dev:
         - kubectl create secret docker-registry cartsregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
         - kubectl create secret docker-registry cartsdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID#" manifest/carts.yml'
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID#" manifest/carts.yml'
         - "kubectl -n dev apply -f manifest/carts.yml"
         - kubectl wait pod -l app=carts  -n dev --for=condition=Ready --timeout=300s
         - kubectl delete secret cartsregcred
@@ -86,13 +82,13 @@ jmeter-tests:
     stage: jmeter-test
     image: dynatraceace/jmeter-runner:1.0.0-acl
     script:
-        - /jmeter/bin/jmeter.sh -n -t jmeter/basiccheck.jmx -l HealthCheck_carts_dev_$VERSION-$CI_PIPELINE_IID -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="HealthCheck_1" -JTestDuration='120' -JThinkTime='250' > Basicresults.txt
+        - /jmeter/bin/jmeter.sh -n -t jmeter/basiccheck.jmx -l HealthCheck_carts_dev-$CI_PIPELINE_IID -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="HealthCheck_1" -JTestDuration='120' -JThinkTime='250' > Basicresults.txt
         - RESULT=$(awk '/Err:\s*/{print $15}' Basicresults.txt)
         - GOAL="0"
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
         - if [ $RESULT != $GOAL ]; then cat BasicResults.txt && echo "jmeter returned error" && exit 63; fi
-        - /jmeter/bin/jmeter.sh -n -t jmeter/carts_load.jmx -l FuncCheck_carts_dev_$VERSION-$CI_PIPELINE_IID -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="FuncCheck_1" -JTestDuration='120' -JThinkTime='250' > Funcresults.txt
+        - /jmeter/bin/jmeter.sh -n -t jmeter/carts_load.jmx -l FuncCheck_carts_dev-$CI_PIPELINE_IID -JSERVER_URL=carts.dev -JSERVER_PORT=80 -JCHECK_PATH "/health" -JVUCount=1 -JLoopCount=1 -JDT_LTN="FuncCheck_1" -JTestDuration='120' -JThinkTime='250' > Funcresults.txt
         - RESULT=$(awk '/Err:\s*/{print $15}' Funcresults.txt)
         - echo $RESULT
         - RESULT=$(echo "$RESULT")
@@ -104,6 +100,8 @@ docker-buildnpush-staging:
         - maven-build
     stage: imageBuildAndPushStaging
     image: docker:24.0.5
+    rules:
+        - if: $CI_COMMIT_TAG
     services:
         - name: docker:24.0.5-dind
           variables:
@@ -112,12 +110,25 @@ docker-buildnpush-staging:
         - docker info
     script:
         - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-        - IMAGE_REPO=$(echo "$CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID")
-        - IMAGE_REPO=$(echo "$IMAGE_REPO")
-        - docker pull $IMAGE_REPO
-        - docker tag $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release
-        - docker push $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release
+        - docker pull $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID
+        - docker tag $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID
+        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID
         - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
+
+release_job:
+  dependencies:
+        - jmeter-tests
+        - maven-build
+        - imageBuildAndPushStaging
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG                 # Run this job when a tag is created
+  script:
+    - echo "running release_job"
+  release:                               # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
 
 deploy-to-staging:
     dependencies:
@@ -125,12 +136,14 @@ deploy-to-staging:
         - docker-buildnpush-staging
         - maven-build
     stage: deployStag
+    rules:
+        - if: $CI_COMMIT_TAG
     image: alpine/kubectl:latest
     script:
         - kubectl create secret docker-registry cartsregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
         - kubectl create secret docker-registry cartsdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release#" manifest/carts.yml'
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID#" manifest/carts.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/carts.yml'
         - "kubectl -n staging apply -f manifest/carts.yml"
         - kubectl wait pod -l app=carts  -n staging --for=condition=Ready --timeout=300s
@@ -158,6 +171,7 @@ deploy-cleaner:
 deploy-stag-cleaner:
     rules:
         - when: on_failure
+        - if: $CI_COMMIT_TAG
     stage: deploy-stag-clean
     image: alpine/kubectl:latest
     script:
@@ -167,6 +181,7 @@ deploy-stag-cleaner:
 staging-cleaner:
     rules:
         - when: on_failure
+        - if: $CI_COMMIT_TAG
     stage: stag-clean
     image: alpine/kubectl:latest
     script:

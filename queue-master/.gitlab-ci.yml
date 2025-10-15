@@ -22,12 +22,9 @@ maven-build:
     image: maven:3.3.9-jdk-8-alpine
     script:
         - mvn -B clean package
-        - echo "VERSION=$(cat version)" > vers.env
     artifacts:
         paths:
             - "/builds/sockshop/queue-master/target/"
-        reports:
-            dotenv: vers.env
 
 dt-event-push:
     stage: dt-event
@@ -50,11 +47,9 @@ docker-buildnpush:
     before_script:
         - docker info
     script:
-        - docker build -t $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID .
+        - docker build -t $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID .
         - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-        - docker push $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID
-        - docker tag $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-dev
-        - docker push $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-dev
+        - docker push $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID
         - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
         - echo "$CI_PIPELINE_IID"
     artifacts:
@@ -71,7 +66,7 @@ deploy-to-dev:
         - kubectl create secret docker-registry queuemasterregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
         - kubectl create secret docker-registry queuemasterdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID#" manifest/queue-master.yml'
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID#" manifest/queue-master.yml'
         - "kubectl -n dev apply -f manifest/queue-master.yml"
         - kubectl wait pod -l app=queue-master  -n dev --for=condition=Ready --timeout=300s
         - kubectl delete secret queuemasterregcred
@@ -103,6 +98,8 @@ docker-buildnpush-staging:
         - jmeter-tests
         - maven-build
     stage: imageBuildAndPushStaging
+    rules:
+        - if: $CI_COMMIT_TAG 
     image: docker:24.0.5
     services:
         - name: docker:24.0.5-dind
@@ -112,12 +109,23 @@ docker-buildnpush-staging:
         - docker info
     script:
         - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-        - IMAGE_REPO=$(echo "$CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID")
-        - IMAGE_REPO=$(echo "$IMAGE_REPO")
-        - docker pull $IMAGE_REPO
-        - docker tag $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release
-        - docker push $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release
+        - docker pull $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID
+        - docker tag $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID
+        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID
         - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
+
+release_job:
+  stage: release
+  dependencies:
+        - imageBuildAndPushStaging
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG                 # Run this job when a tag is created
+  script:
+    - echo "running release_job"
+  release:                               # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
 
 deploy-to-staging:
     dependencies:
@@ -125,12 +133,14 @@ deploy-to-staging:
         - docker-buildnpush-staging
         - maven-build
     stage: deployStag
+    rules:
+        - if: $CI_COMMIT_TAG 
     image: alpine/kubectl:latest
     script:
         - kubectl create secret docker-registry queuemasterregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
         - kubectl create secret docker-registry queuemasterdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$VERSION-$CI_PIPELINE_IID-Release#" manifest/queue-master.yml'
+        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID#" manifest/queue-master.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/queue-master.yml'
         - "kubectl -n staging apply -f manifest/queue-master.yml"
         - kubectl delete pod -l app=queue-master -n staging
@@ -159,6 +169,7 @@ deploy-cleaner:
 deploy-stag-cleaner:
     rules:
         - when: on_failure
+        - if: $CI_COMMIT_TAG
     stage: deploy-stag-clean
     image: alpine/kubectl:latest
     script:
@@ -168,6 +179,7 @@ deploy-stag-cleaner:
 staging-cleaner:
     rules:
         - when: on_failure
+        - if: $CI_COMMIT_TAG
     stage: stag-clean
     image: alpine/kubectl:latest
     script:
