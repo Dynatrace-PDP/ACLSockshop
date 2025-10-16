@@ -5,6 +5,7 @@ stages:
     - dt-event
     - jmeter-test
     - imageBuildAndPushStaging
+    - release
     - deployStag
     - regcred-clean
     - stag-clean
