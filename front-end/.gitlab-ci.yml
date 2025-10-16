@@ -98,7 +98,7 @@ release_job:
   stage: release
   dependencies:
         - node-build
-        - imageBuildAndPushStaging
+        - docker-buildnpush-staging
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   rules:
     - if: $CI_COMMIT_TAG                 # Run this job when a tag is created
