@@ -44,7 +44,7 @@ docker-buildnpush:
     DOCKER_DRIVER: overlay2
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     #important! MTU 1410 makes the MTU packages compatible with the underlying network. Otherwise, it will get stuck in downloads 
-    DOCKER_DAEMON_OPTIONS: "--insecure-registry=$CI_REGISTRY --mtu=1410"
+    DOCKER_DAEMON_OPTIONS: "--insecure-registry=gitlab-registry.gitlab.svc.cluster.local:5000 --mtu=1410"
   services:
     - name: docker:27.2.0-dind
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
@@ -52,9 +52,9 @@ docker-buildnpush:
     - docker info
   script:
     - docker info
-    - docker build -t $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID .
-    - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-    - docker push $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID
+    - docker build -t gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:DEV-$CI_PIPELINE_IID .
+    - docker login gitlab-registry.gitlab.svc.cluster.local:5000 -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+    - docker push gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:DEV-$CI_PIPELINE_IID
     - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
     - echo "$CI_PIPELINE_IID"
   artifacts:
@@ -68,10 +68,10 @@ deploy-to-dev:
     stage: deployDev
     image: alpine/kubectl:latest
     script:
-        - kubectl create secret docker-registry queuemasterregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry queuemasterregcred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry queuemasterdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID#" manifest/queue-master.yml'
+        - kubectl create secret docker-registry queuemasterdeploycred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
+        - 'sed -i "s#image: .*#image: gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:DEV-$CI_PIPELINE_IID#" manifest/queue-master.yml'
         - "kubectl -n dev apply -f manifest/queue-master.yml"
         - kubectl wait pod -l app=queue-master  -n dev --for=condition=Ready --timeout=300s
         - kubectl delete secret queuemasterregcred
@@ -114,17 +114,17 @@ docker-buildnpush-staging:
     DOCKER_DRIVER: overlay2
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     #important! MTU 1410 makes the MTU packages compatible with the underlying network. Otherwise, it will get stuck in downloads 
-    DOCKER_DAEMON_OPTIONS: "--insecure-registry=$CI_REGISTRY --mtu=1410"
+    DOCKER_DAEMON_OPTIONS: "--insecure-registry=gitlab-registry.gitlab.svc.cluster.local:5000 --mtu=1410"
   services:
     - name: docker:27.2.0-dind
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   before_script:
     - docker info
   script:
-        - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-        - docker pull $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID
-        - docker tag $CI_REGISTRY_IMAGE:DEV-$CI_PIPELINE_IID $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID
-        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID
+        - docker login gitlab-registry.gitlab.svc.cluster.local:5000 -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+        - docker pull gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:DEV-$CI_PIPELINE_IID
+        - docker tag gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:DEV-$CI_PIPELINE_IID gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:$CI_COMMIT_TAG-$CI_PIPELINE_IID
+        - docker push gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:$CI_COMMIT_TAG-$CI_PIPELINE_IID
 
 release_job:
   stage: release
@@ -149,10 +149,10 @@ deploy-to-staging:
         - if: $CI_COMMIT_TAG 
     image: alpine/kubectl:latest
     script:
-        - kubectl create secret docker-registry queuemasterregcred --docker-server=$CI_REGISTRY --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry queuemasterregcred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry queuemasterdeploycred --docker-server=$CI_REGISTRY --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
-        - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG-$CI_PIPELINE_IID#" manifest/queue-master.yml'
+        - kubectl create secret docker-registry queuemasterdeploycred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
+        - 'sed -i "s#image: .*#image: gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/queue-master:$CI_COMMIT_TAG-$CI_PIPELINE_IID#" manifest/queue-master.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/queue-master.yml'
         - "kubectl -n staging apply -f manifest/queue-master.yml"
         - kubectl delete pod -l app=queue-master -n staging
