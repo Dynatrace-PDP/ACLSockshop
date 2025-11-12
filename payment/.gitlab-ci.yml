@@ -51,7 +51,7 @@ docker-buildnpush:
     DOCKER_DRIVER: overlay2
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     #important! MTU 1410 makes the MTU packages compatible with the underlying network. Otherwise, it will get stuck in downloads 
-    DOCKER_DAEMON_OPTIONS: "--insecure-registry=/sockshop/catalogue --mtu=1410"
+    DOCKER_DAEMON_OPTIONS: "--insecure-registry=gitlab-registry.gitlab.svc.cluster.local:5000 --mtu=1410"
   services:
     - name: docker:27.2.0-dind
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
@@ -59,9 +59,9 @@ docker-buildnpush:
     - docker info
   script:
     - docker info
-    - docker build -t /sockshop/catalogue/sockshop/catalogue:DEV-$CI_PIPELINE_IID .
-    - docker login /sockshop/catalogue -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-    - docker push /sockshop/catalogue/sockshop/catalogue:DEV-$CI_PIPELINE_IID
+    - docker build -t gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:DEV-$CI_PIPELINE_IID .
+    - docker login gitlab-registry.gitlab.svc.cluster.local:5000 -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+    - docker push gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:DEV-$CI_PIPELINE_IID
     - echo "AUTH_TOKEN=$(sed -nE '$!{:a;N;$!ba;s/\n//g;s/"auth":[^"]*"([^"]*)"/\n\1\nAUTH/g};/^[^\n]*\nAUTH/P;D' ~/.docker/config.json)" >> auth.env
     - echo "$CI_PIPELINE_IID"
   artifacts:
@@ -75,10 +75,10 @@ deploy-to-dev:
     stage: deployDev
     image: alpine/kubectl:latest
     script:
-        - kubectl create secret docker-registry paymentregcred --docker-server=/sockshop/catalogue --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry paymentregcred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry paymentdeploycred --docker-server=/sockshop/catalogue --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
-        - 'sed -i "s#image: .*#image: /sockshop/catalogue/sockshop/catalogue:DEV-$CI_PIPELINE_IID#" manifest/payment.yml'
+        - kubectl create secret docker-registry paymentdeploycred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n dev
+        - 'sed -i "s#image: .*#image: gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:DEV-$CI_PIPELINE_IID#" manifest/payment.yml'
         - "kubectl -n dev apply -f manifest/payment.yml"
         - kubectl wait pod -l app=payment  -n dev --for=condition=Ready --timeout=300s
         - kubectl delete secret paymentregcred
@@ -121,17 +121,17 @@ docker-buildnpush-staging:
     DOCKER_DRIVER: overlay2
     DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
     #important! MTU 1410 makes the MTU packages compatible with the underlying network. Otherwise, it will get stuck in downloads 
-    DOCKER_DAEMON_OPTIONS: "--insecure-registry=/sockshop/catalogue --mtu=1410"
+    DOCKER_DAEMON_OPTIONS: "--insecure-registry=gitlab-registry.gitlab.svc.cluster.local:5000 --mtu=1410"
   services:
     - name: docker:27.2.0-dind
       entrypoint: [ "sh", "-c", "dockerd-entrypoint.sh $DOCKER_DAEMON_OPTIONS" ]
   before_script:
     - docker info
   script:
-        - docker login /sockshop/catalogue -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
-        - docker pull /sockshop/catalogue/sockshop/catalogue:DEV-$CI_PIPELINE_IID
-        - docker tag /sockshop/catalogue/sockshop/catalogue:DEV-$CI_PIPELINE_IID /sockshop/catalogue/sockshop/catalogue:$CI_COMMIT_TAG-$CI_PIPELINE_IID
-        - docker push /sockshop/catalogue/sockshop/catalogue:$CI_COMMIT_TAG-$CI_PIPELINE_IID
+        - docker login gitlab-registry.gitlab.svc.cluster.local:5000 -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD
+        - docker pull gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:DEV-$CI_PIPELINE_IID
+        - docker tag gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:DEV-$CI_PIPELINE_IID gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:$CI_COMMIT_TAG-$CI_PIPELINE_IID
+        - docker push gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:$CI_COMMIT_TAG-$CI_PIPELINE_IID
 
 release_job:
   stage: release
@@ -156,10 +156,10 @@ deploy-to-staging:
         - if: $CI_COMMIT_TAG
     image: alpine/kubectl:latest
     script:
-        - kubectl create secret docker-registry paymentregcred --docker-server=/sockshop/catalogue --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
+        - kubectl create secret docker-registry paymentregcred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_REGISTRY_USER --docker-password=$AUTH_TOKEN
         - echo "$CI_DEPLOY_USER, $CI_DEPLOY_PASSWORD"
-        - kubectl create secret docker-registry paymentdeploycred --docker-server=/sockshop/catalogue --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
-        - 'sed -i "s#image: .*#image: /sockshop/catalogue/sockshop/catalogue:$CI_COMMIT_TAG-$CI_PIPELINE_IID#" manifest/payment.yml'
+        - kubectl create secret docker-registry paymentdeploycred --docker-server=gitlab-registry.gitlab.svc.cluster.local:5000 --docker-username=$CI_DEPLOY_USER --docker-password=$CI_DEPLOY_PASSWORD -n staging
+        - 'sed -i "s#image: .*#image: gitlab-registry.gitlab.svc.cluster.local:5000/sockshop/payment:$CI_COMMIT_TAG-$CI_PIPELINE_IID#" manifest/payment.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/payment.yml'
         - "kubectl -n staging apply -f manifest/payment.yml"
         - kubectl delete pod -l app=payment -n staging
