@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: shipping-v1
+      app: shipping
   template:
     metadata:
       labels:
-        app: shipping-v1
+        app: shipping
         version: v1
     spec:
       containers:
@@ -63,9 +63,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: shipping-v1
+  name: shipping
   labels:
-    app: shipping-v1
+    app: shipping
   namespace: prod
 spec:
   ports:
@@ -73,4 +73,4 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: shipping-v1
+    app: shipping

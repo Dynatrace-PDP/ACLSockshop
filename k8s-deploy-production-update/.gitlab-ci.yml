@@ -25,7 +25,7 @@ kube-prod-update:
            sed -i "s#  version: v1#  version: $VERSION#" $SERVICE.yml
         # update name
         - | 
-           sed -i "s#  name: $SERVICE-v1#  name: $SERVICE-$VERSION#" $SERVICE.yml
+           sed -i "s#  name: $SERVICE#  name: $SERVICE-$VERSION#" $SERVICE.yml
         - |
            kubectl apply -f $SERVICE.yml
 

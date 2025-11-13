@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: queue-master-v1
+      app: queue-master
   template:
     metadata:
       labels:
-        app: queue-master-v1
+        app: queue-master
         version: v1
     spec:
       containers:
@@ -63,9 +63,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: queue-master-v1
+  name: queue-master
   labels:
-    app: queue-master-v1
+    app: queue-master
   namespace: prod
 spec:
   ports:
@@ -73,4 +73,4 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: queue-master-v1
+    app: queue-master
