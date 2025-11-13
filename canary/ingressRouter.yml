@@ -8,7 +8,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`sockshop.1b3e0f64-9c7c-4744-82b4-005a84c13fe2.dynatrace.training`)
+      match: Host(`sockshop.<INGRESS DOMAIN>`)
       services:
       - kind: Service
         name: front-end-v1
