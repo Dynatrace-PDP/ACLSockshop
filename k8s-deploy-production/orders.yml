@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: orders
+      app: orders-v1
   template:
     metadata:
       labels:
-        app: orders
+        app: orders-v1
         version: v1
     spec:
       containers:
@@ -64,9 +64,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: orders
+  name: orders-v1
   labels:
-    app: orders
+    app: orders-v1
   namespace: prod
 spec:
   ports:
@@ -74,4 +74,4 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: orders
+    app: orders-v1

@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: catalogue
+      app: catalogue-v1
   template:
     metadata:
       labels:
-        app: catalogue
+        app: catalogue-v1
         version: v1
     spec:
       containers:
@@ -62,9 +62,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: catalogue
+  name: catalogue-v1
   labels:
-    app: catalogue
+    app: catalogue-v1
   namespace: prod
 spec:
   ports:
@@ -72,4 +72,4 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: catalogue
+    app: catalogue-v1

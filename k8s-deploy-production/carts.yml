@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: carts
+      app: carts-v1
   template:
     metadata:
       labels:
-        app: carts
+        app: carts-v1
         version: v1
     spec:
       containers:
@@ -63,9 +63,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: carts
+  name: carts-v1
   labels:
-    app: carts
+    app: carts-v1
   namespace: prod
 spec:
   ports:
@@ -73,5 +73,5 @@ spec:
     port: 80
     targetPort: 8080
   selector:
-    app: carts
+    app: carts-v1
   type: LoadBalancer
