@@ -8,7 +8,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: front-end
+      app: front-end-v1
       version: v1
   template:
     metadata:
@@ -59,7 +59,7 @@ kind: Service
 metadata:
   name: front-end
   labels:
-    app: front-end
+    app: front-end-v1
   namespace: prod
 spec:
   ports:
@@ -67,4 +67,4 @@ spec:
     port: 8080
     targetPort: 8080
   selector:
-    app: front-end
+    app: front-end-v1
