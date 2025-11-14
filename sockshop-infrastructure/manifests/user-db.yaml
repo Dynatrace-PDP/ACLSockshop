@@ -18,6 +18,7 @@ metadata:
   namespace: dev
   labels:
     name: user-db
+    part-of: sockshop
 spec:
   replicas: 1
   strategy:
@@ -29,6 +30,7 @@ spec:
     metadata:
       labels:
         name: user-db
+        part-of: sockshop
     spec:
       containers:
       - image: mongo:4.4
@@ -50,6 +52,8 @@ kind: Service
 metadata:
   name: user-db
   namespace: dev
+  labels:
+    part-of: sockshop
 spec:
   ports:
   - name: "27017"
@@ -77,6 +81,7 @@ metadata:
   namespace: staging
   labels:
     name: user-db
+    part-of: sockshop
 spec:
   replicas: 1
   strategy:
@@ -88,6 +93,7 @@ spec:
     metadata:
       labels:
         name: user-db
+        part-of: sockshop
     spec:
       containers:
       - image: mongo:4.4
@@ -109,6 +115,8 @@ kind: Service
 metadata:
   name: user-db
   namespace: staging
+  labels:
+    part-of: sockshop
 spec:
   ports:
   - name: "27017"
@@ -136,6 +144,7 @@ metadata:
   namespace: prod
   labels:
     name: user-db
+    part-of: sockshop
 spec:
   replicas: 1
   strategy:
@@ -147,6 +156,7 @@ spec:
     metadata:
       labels:
         name: user-db
+        part-of: sockshop
     spec:
       containers:
       - image: mongo:4.4
@@ -168,6 +178,8 @@ kind: Service
 metadata:
   name: user-db
   namespace: prod
+  labels:
+    part-of: sockshop
 spec:
   ports:
   - name: "27017"

@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: front-end
   namespace: prod
+  labels:
+    part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -15,6 +17,7 @@ spec:
       labels:
         app: front-end
         version: v1
+        part-of: sockshop
     spec:
       containers:
       - name: front-end
@@ -60,6 +63,7 @@ metadata:
   name: front-end
   labels:
     app: front-end
+    part-of: sockshop
   namespace: prod
 spec:
   ports:

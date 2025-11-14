@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: orders
   namespace: dev
+  labels:
+    part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -14,6 +16,7 @@ spec:
       labels:
         app: orders
         version: v1
+        part-of: sockshop
     spec:
       containers:
       - name: orders
@@ -67,6 +70,7 @@ metadata:
   name: orders
   labels:
     app: orders
+    part-of: sockshop
   namespace: dev
 spec:
   ports:

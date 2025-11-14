@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: payment
   namespace: dev
+  labels:
+    part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -14,6 +16,7 @@ spec:
       labels:
         app: payment
         version: v1
+        part-of: sockshop
     spec:
       containers:
       - name: payment
@@ -65,6 +68,7 @@ metadata:
   name: payment
   labels:
     app: payment
+    part-of: sockshop
   namespace: dev
 spec:
   ports:

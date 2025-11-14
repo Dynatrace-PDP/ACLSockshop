@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: queue-master
   namespace: prod
+  labels:
+    part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -14,6 +16,7 @@ spec:
       labels:
         app: queue-master
         version: v1
+        part-of: sockshop
     spec:
       containers:
       - name: queue-master
@@ -66,6 +69,7 @@ metadata:
   name: queue-master
   labels:
     app: queue-master
+    part-of: sockshop
   namespace: prod
 spec:
   ports:

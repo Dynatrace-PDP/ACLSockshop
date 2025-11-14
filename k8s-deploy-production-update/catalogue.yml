@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: catalogue
   namespace: prod
+  labels:
+    part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -14,6 +16,7 @@ spec:
       labels:
         app: catalogue
         version: v1
+        part-of: sockshop
     spec:
       containers:
       - name: catalogue
@@ -65,6 +68,7 @@ metadata:
   name: catalogue
   labels:
     app: catalogue
+    part-of: sockshop
   namespace: prod
 spec:
   ports:

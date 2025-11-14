@@ -5,6 +5,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+    part-of: sockshop
   namespace: dev
 spec:
   replicas: 1
@@ -15,6 +16,7 @@ spec:
     metadata:
       labels:
         name: catalogue-db
+        part-of: sockshop
     spec:
       containers:
       - name: catalogue-db
@@ -34,6 +36,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+    part-of: sockshop
   namespace: dev
 spec:
   ports:
@@ -48,6 +51,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+    part-of: sockshop
   namespace: staging
 spec:
   replicas: 1
@@ -58,6 +62,7 @@ spec:
     metadata:
       labels:
         name: catalogue-db
+        part-of: sockshop
     spec:
       containers:
       - name: catalogue-db
@@ -77,6 +82,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+    part-of: sockshop
   namespace: staging
 spec:
   ports:
@@ -91,6 +97,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+    part-of: sockshop
   namespace: prod
 spec:
   replicas: 1
@@ -120,6 +127,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+    part-of: sockshop
   namespace: prod
 spec:
   ports:

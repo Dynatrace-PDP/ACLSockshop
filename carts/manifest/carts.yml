@@ -4,6 +4,8 @@ kind: Deployment
 metadata:
   name: carts
   namespace: dev
+  labels:
+    part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -16,6 +18,7 @@ spec:
         service: carts
         app: carts
         version: v1
+        part-of: sockshop
     spec:
       containers:
       - name: carts
@@ -69,6 +72,7 @@ metadata:
   name: carts
   labels:
     app: carts
+    part-of: sockshop
   namespace: dev
 spec:
   ports:
