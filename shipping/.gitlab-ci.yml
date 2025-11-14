@@ -193,6 +193,7 @@ deploy-to-staging:
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG#" manifest/shipping.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/shipping.yml'
         - "kubectl -n staging apply -f manifest/shipping.yml"
+        - kubectl wait pod -l app=shipping  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret shippingregcred
         - kubectl delete secret shippingdeploycred -n staging
 

@@ -201,6 +201,7 @@ deploy-to-staging:
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG#" manifest/payment.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/payment.yml'
         - "kubectl -n staging apply -f manifest/payment.yml"
+        - kubectl wait pod -l app=payment  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret paymentregcred
         - kubectl delete secret paymentdeploycred -n staging
 
@@ -216,8 +217,8 @@ regcred-cleaner:
 
 deploy-cleaner:
     rules:
-        - if: $CI_COMMIT_TAG == null
         - when: on_failure
+        - if: $CI_COMMIT_TAG == null
     stage: deploy-clean
     image: alpine/kubectl:latest
     script:

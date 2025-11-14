@@ -203,6 +203,7 @@ deploy-to-staging:
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG#" manifest/user.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/user.yml'
         - "kubectl -n staging apply -f manifest/user.yml"
+        - kubectl wait pod -l app=user  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret userregcred
         - kubectl delete secret userdeploycred -n staging
 

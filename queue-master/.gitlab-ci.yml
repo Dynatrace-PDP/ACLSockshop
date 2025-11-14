@@ -111,6 +111,8 @@ jmeter-tests:
 
 docker-buildnpush-validated:
   image: docker:27.2.0
+  dependencies:
+        - jmeter-tests
   stage: imageBuildAndPush-validated
   rules:
     - if: $CI_COMMIT_TAG == null
@@ -191,13 +193,14 @@ deploy-to-staging:
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG#" manifest/queue-master.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/queue-master.yml'
         - "kubectl -n staging apply -f manifest/queue-master.yml"
+        - kubectl wait pod -l app=queue-master  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret queuemasterregcred
         - kubectl delete secret queuemasterdeploycred -n staging
 
 regcred-cleaner:
     rules:
-        - if: $CI_COMMIT_TAG == null
         - when: on_failure
+        - if: $CI_COMMIT_TAG == null
     stage: regcred-clean
     image: alpine/kubectl:latest
     script:
@@ -206,8 +209,8 @@ regcred-cleaner:
 
 deploy-cleaner:
     rules:
-        - if: $CI_COMMIT_TAG == null
         - when: on_failure
+        - if: $CI_COMMIT_TAG == null
     stage: deploy-clean
     image: alpine/kubectl:latest
     script:

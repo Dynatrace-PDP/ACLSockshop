@@ -115,7 +115,7 @@ docker-buildnpush-validated:
   stage: imageBuildAndPush-validated
   dependencies:
     - maven-build
-    - jmeter-test
+    - jmeter-tests
   #needs: ["monaco", "init_keptn"]
   variables:
     DOCKER_HOST: tcp://docker:2376
@@ -195,6 +195,7 @@ deploy-to-staging:
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG#" manifest/carts.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/carts.yml'
         - "kubectl -n staging apply -f manifest/carts.yml"
+        - kubectl wait pod -l app=carts  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret cartsregcred
         - kubectl delete secret cartsdeploycred -n staging
 

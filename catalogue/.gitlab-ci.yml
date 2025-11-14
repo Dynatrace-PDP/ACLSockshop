@@ -201,6 +201,7 @@ deploy-to-staging:
         - 'sed -i "s#image: .*#image: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG#" manifest/catalogue.yml'
         - 'sed -i "s#namespace: .*#namespace: staging#" manifest/catalogue.yml'
         - "kubectl -n staging apply -f manifest/catalogue.yml"
+        - kubectl wait pod -l app=catalogue  -n staging --for=condition=Ready --timeout=300s
         - kubectl delete secret catalogueregcred
         - kubectl delete secret cataloguedeploycred -n staging
 
