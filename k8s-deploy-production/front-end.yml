@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        app: front-end
+        app: front-end-v1
         app.kubernetes.io/version: v1
         app.kubernetes.io/part-of: sockshop
     spec:
