@@ -5,7 +5,7 @@ metadata:
   name: shipping
   namespace: dev
   labels:
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -15,8 +15,8 @@ spec:
     metadata:
       labels:
         app: shipping
-        version: v1
-        part-of: sockshop
+        app.kubernetes.io/version: v1
+        app.kubernetes.io/part-of: sockshop
     spec:
       containers:
       - name: shipping
@@ -64,13 +64,13 @@ spec:
       - name: shippingdeploycred
 
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: shipping
   labels:
     app: shipping
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: dev
 spec:
   ports:

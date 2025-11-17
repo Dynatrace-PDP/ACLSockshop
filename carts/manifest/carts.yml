@@ -5,7 +5,7 @@ metadata:
   name: carts
   namespace: dev
   labels:
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -17,8 +17,8 @@ spec:
       labels:
         service: carts
         app: carts
-        version: v1
-        part-of: sockshop
+        app.kubernetes.io/version: v1
+        app.kubernetes.io/part-of: sockshop
     spec:
       containers:
       - name: carts
@@ -66,13 +66,13 @@ spec:
       - name: cartsdeploycred
 
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: carts
   labels:
     app: carts
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: dev
 spec:
   ports:

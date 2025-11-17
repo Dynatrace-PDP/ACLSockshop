@@ -1,5 +1,5 @@
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: PersistentVolumeClaim
 metadata:
   name: carts-db-mongodata
@@ -18,7 +18,7 @@ spec:
     namespace: dev
     labels:
       name: carts-db
-      part-of: sockshop
+      app.kubernetes.io/part-of: sockshop
   spec:
     replicas: 1
     selector:
@@ -30,7 +30,7 @@ spec:
       metadata:
         labels:
           name: carts-db
-          part-of: sockshop
+          app.kubernetes.io/part-of: sockshop
       spec:
         containers:
         - image: mongo:4.4
@@ -47,13 +47,13 @@ spec:
           persistentVolumeClaim:
             claimName: carts-db-mongodata
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: carts-db
   namespace: dev
   labels:
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   ports:
   - name: "27017"
@@ -62,7 +62,7 @@ spec:
   selector:
     name: carts-db
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: PersistentVolumeClaim
 metadata:
   name: carts-db-mongodata
@@ -81,7 +81,7 @@ spec:
     namespace: staging
     labels:
       name: carts-db
-      part-of: sockshop
+      app.kubernetes.io/part-of: sockshop
   spec:
     replicas: 1
     selector:
@@ -93,7 +93,7 @@ spec:
       metadata:
         labels:
           name: carts-db
-          part-of: sockshop
+          app.kubernetes.io/part-of: sockshop
       spec:
         containers:
         - image: mongo:4.4
@@ -110,13 +110,13 @@ spec:
           persistentVolumeClaim:
             claimName: carts-db-mongodata
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: carts-db
   namespace: staging
   labels:
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   ports:
   - name: "27017"
@@ -125,7 +125,7 @@ spec:
   selector:
     name: carts-db
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: PersistentVolumeClaim
 metadata:
   name: carts-db-mongodata
@@ -144,7 +144,7 @@ metadata:
   namespace: prod
   labels:
     name: carts-db
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -156,7 +156,7 @@ spec:
     metadata:
       labels:
         name: carts-db
-        part-of: sockshop
+        app.kubernetes.io/part-of: sockshop
     spec:
       containers:
       - image: mongo:4.4
@@ -173,13 +173,13 @@ spec:
         persistentVolumeClaim:
           claimName: carts-db-mongodata
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: carts-db
   namespace: prod
   labels:
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   ports:
   - name: "27017"

@@ -5,19 +5,19 @@ metadata:
   name: front-end
   namespace: prod
   labels:
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: front-end
-      version: v1
+      app.kubernetes.io/version: v1
   template:
     metadata:
       labels:
         app: front-end
-        version: v1
-        part-of: sockshop
+        app.kubernetes.io/version: v1
+        app.kubernetes.io/part-of: sockshop
     spec:
       containers:
       - name: front-end
@@ -57,13 +57,13 @@ spec:
       - name: proddeploycred
 
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: front-end
   labels:
     app: front-end
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: prod
 spec:
   ports:

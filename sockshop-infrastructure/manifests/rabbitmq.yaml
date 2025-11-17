@@ -5,7 +5,7 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: dev
 spec:
   replicas: 1
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         name: rabbitmq
-        part-of: sockshop
+        app.kubernetes.io/part-of: sockshop
       annotations:
         prometheus.io/scrape: "false"
     spec:
@@ -46,13 +46,13 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: dev
 spec:
   ports:
@@ -75,7 +75,7 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: staging
 spec:
   replicas: 1
@@ -86,7 +86,7 @@ spec:
     metadata:
       labels:
         name: rabbitmq
-        part-of: sockshop
+        app.kubernetes.io/part-of: sockshop
       annotations:
         prometheus.io/scrape: "false"
     spec:
@@ -116,13 +116,13 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: staging
 spec:
   ports:
@@ -145,7 +145,7 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: prod
 spec:
   replicas: 1
@@ -156,7 +156,7 @@ spec:
     metadata:
       labels:
         name: rabbitmq
-        part-of: sockshop
+        app.kubernetes.io/part-of: sockshop
       annotations:
         prometheus.io/scrape: "false"
     spec:
@@ -186,13 +186,13 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: prod
 spec:
   ports:

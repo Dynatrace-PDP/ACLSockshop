@@ -5,7 +5,7 @@ metadata:
   name: orders-v1
   namespace: prod
   labels:
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
 spec:
   replicas: 1
   selector:
@@ -15,8 +15,8 @@ spec:
     metadata:
       labels:
         app: orders-v1
-        version: v1
-        part-of: sockshop
+        app.kubernetes.io/version: v1
+        app.kubernetes.io/part-of: sockshop
     spec:
       containers:
       - name: orders
@@ -64,13 +64,13 @@ spec:
       imagePullSecrets:
       - name: proddeploycred
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: orders
   labels:
     app: orders-v1
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: prod
 spec:
   ports:

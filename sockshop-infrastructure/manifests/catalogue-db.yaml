@@ -5,7 +5,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: dev
 spec:
   replicas: 1
@@ -16,7 +16,7 @@ spec:
     metadata:
       labels:
         name: catalogue-db
-        part-of: sockshop
+        app.kubernetes.io/part-of: sockshop
     spec:
       containers:
       - name: catalogue-db
@@ -30,13 +30,13 @@ spec:
         - name: mysql
           containerPort: 3306
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: dev
 spec:
   ports:
@@ -51,7 +51,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: staging
 spec:
   replicas: 1
@@ -62,7 +62,7 @@ spec:
     metadata:
       labels:
         name: catalogue-db
-        part-of: sockshop
+        app.kubernetes.io/part-of: sockshop
     spec:
       containers:
       - name: catalogue-db
@@ -76,13 +76,13 @@ spec:
         - name: mysql
           containerPort: 3306
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: staging
 spec:
   ports:
@@ -97,7 +97,7 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: prod
 spec:
   replicas: 1
@@ -121,13 +121,13 @@ spec:
         - name: mysql
           containerPort: 3306
 ---
-apiVersion: v1
+apiapp.kubernetes.io/version: v1
 kind: Service
 metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
-    part-of: sockshop
+    app.kubernetes.io/part-of: sockshop
   namespace: prod
 spec:
   ports:
