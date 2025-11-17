@@ -4,7 +4,8 @@ kind: Deployment
 metadata:
   name: catalogue
   namespace: dev
-  labels: sockshop
+  labels:
+    part-of: sockshop
 spec:
   replicas: 1
   selector:
