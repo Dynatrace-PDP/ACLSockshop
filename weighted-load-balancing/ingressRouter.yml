@@ -11,7 +11,7 @@ spec:
       match: Host(`sockshop.<INGRESS DOMAIN>`)
       services:
       - kind: Service
-        name: front-end-v1
+        name: front-end
         port: 8080
         weight: 50
       - kind: Service
