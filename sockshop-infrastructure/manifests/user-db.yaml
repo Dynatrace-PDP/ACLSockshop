@@ -1,5 +1,5 @@
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: user-db-mongodata
@@ -47,7 +47,7 @@ spec:
         persistentVolumeClaim:
           claimName: user-db-mongodata
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: user-db
@@ -62,7 +62,7 @@ spec:
   selector:
     name: user-db
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: user-db-mongodata
@@ -110,7 +110,7 @@ spec:
         persistentVolumeClaim:
           claimName: user-db-mongodata
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: user-db
@@ -125,7 +125,7 @@ spec:
   selector:
     name: user-db
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: user-db-mongodata
@@ -173,7 +173,7 @@ spec:
         persistentVolumeClaim:
           claimName: user-db-mongodata
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: user-db

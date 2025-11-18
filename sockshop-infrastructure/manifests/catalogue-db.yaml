@@ -30,7 +30,7 @@ spec:
         - name: mysql
           containerPort: 3306
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: catalogue-db
@@ -76,7 +76,7 @@ spec:
         - name: mysql
           containerPort: 3306
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: catalogue-db
@@ -121,7 +121,7 @@ spec:
         - name: mysql
           containerPort: 3306
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: catalogue-db

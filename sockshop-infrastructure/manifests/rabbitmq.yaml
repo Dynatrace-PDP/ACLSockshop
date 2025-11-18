@@ -46,7 +46,7 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq
@@ -116,7 +116,7 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq
@@ -186,7 +186,7 @@ spec:
       nodeSelector:
         beta.kubernetes.io/os: linux
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: rabbitmq
