@@ -56,7 +56,7 @@ spec:
       - name: frontenddeploycred
 
 ---
-apiapp.kubernetes.io/version: v1
+apiVersion: v1
 kind: Service
 metadata:
   name: front-end
