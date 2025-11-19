@@ -15,9 +15,9 @@ dt-event-push:
         - VERSION1=$(echo "$[[ inputs.VERSION1 ]]")
         - VERSION2=$(echo "$[[ inputs.VERSION2 ]]")
         - |
-            PAYLOAD1='{"input": {"version 1": "'
+            PAYLOAD1='{"input": {"version1": "'
         - |
-            PAYLOAD2='", "version 2": "'
+            PAYLOAD2='", "version2": "'
         - | 
             PAYLOAD3='", "domain": "'
         - | 

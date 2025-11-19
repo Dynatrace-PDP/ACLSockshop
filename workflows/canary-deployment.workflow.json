@@ -1,0 +1,422 @@
+{
+  "id": "0e0747a4-1bbc-42be-b2ed-3c800b79f3ff",
+  "title": "Canary Deployment",
+  "tasks": {
+    "traffickswap1": {
+      "name": "traffickswap1",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 90\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 10\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 1
+      },
+      "description": "Patches a Kubernetes resource",
+      "predecessors": []
+    },
+    "traffickswap2": {
+      "name": "traffickswap2",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 80\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 20\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 2
+      },
+      "conditions": {
+        "states": {
+          "traffickswap1": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap1"
+      ]
+    },
+    "traffickswap3": {
+      "name": "traffickswap3",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 70\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 30\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 3
+      },
+      "conditions": {
+        "states": {
+          "traffickswap2": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap2"
+      ]
+    },
+    "traffickswap4": {
+      "name": "traffickswap4",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 60\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 40\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 4
+      },
+      "conditions": {
+        "states": {
+          "traffickswap3": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap3"
+      ]
+    },
+    "traffickswap5": {
+      "name": "traffickswap5",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 50\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 50\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 5
+      },
+      "conditions": {
+        "states": {
+          "traffickswap4": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap4"
+      ]
+    },
+    "traffickswap6": {
+      "name": "traffickswap6",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 40\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 60\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 6
+      },
+      "conditions": {
+        "states": {
+          "traffickswap5": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap5"
+      ]
+    },
+    "traffickswap7": {
+      "name": "traffickswap7",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 30\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 70\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 7
+      },
+      "conditions": {
+        "states": {
+          "traffickswap6": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap6"
+      ]
+    },
+    "traffickswap8": {
+      "name": "traffickswap8",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 20\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 80\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 8
+      },
+      "conditions": {
+        "states": {
+          "traffickswap7": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "predecessors": [
+        "traffickswap7"
+      ]
+    },
+    "traffickswap9": {
+      "name": "traffickswap9",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 10\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 90\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 9
+      },
+      "conditions": {
+        "states": {
+          "traffickswap8": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap8"
+      ]
+    },
+    "traffickswap10": {
+      "name": "traffickswap10",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{input('domain')}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version1')}}\",\n                \"port\": 8080,\n                \"weight\": 0\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{input('version2')}}\",\n                \"port\": 8080,\n                \"weight\": 100\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 10
+      },
+      "conditions": {
+        "states": {
+          "traffickswap9": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 5,
+      "predecessors": [
+        "traffickswap9"
+      ]
+    }
+  },
+  "description": "",
+  "actor": "7727947d-67b5-4e97-beb5-6a18c74d1eac",
+  "owner": "7727947d-67b5-4e97-beb5-6a18c74d1eac",
+  "ownerType": "USER",
+  "isPrivate": true,
+  "trigger": {},
+  "schemaVersion": 3,
+  "result": null,
+  "input": {
+    "domain": "heheh.com",
+    "version1": "v1",
+    "version2": "v2"
+  },
+  "hourlyExecutionLimit": 1000,
+  "type": "STANDARD"
+}

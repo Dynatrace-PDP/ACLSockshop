@@ -1,0 +1,127 @@
+{
+  "id": "a2fa86ed-83b2-46b4-9312-141d02e8abed",
+  "title": "workflow killer",
+  "tasks": {
+    "get_executions": {
+      "name": "get_executions",
+      "input": {
+        "url": "jgg71876.apps.dynatrace.com/platform/automation/v1/executions?adminAccess=true",
+        "method": "GET",
+        "credential": {
+          "type": "token",
+          "tokenPrefix": "Bearer",
+          "credentialId": "CREDENTIALS_VAULT-C2F60D5F7A72BDFA"
+        },
+        "failOnResponseCodes": "400-599"
+      },
+      "action": "dynatrace.automations:http-function",
+      "position": {
+        "x": 0,
+        "y": 1
+      },
+      "description": "Issue an HTTP request to any API.",
+      "predecessors": []
+    },
+    "patch_resource_1": {
+      "name": "patch_resource_1",
+      "input": {
+        "name": "sockshop",
+        "patch": "{\n  \"spec\": \n    {\n      \"entryPoints\": \n        [\n          \"websecure\"\n        ],\n      \"routes\": \n        [\n          {\n            \"kind\": \"Rule\",\n            \"match\": \"Host(`sockshop.{{result(\"get_executions\")[\"json\"] | json_query(\"results[?state == 'RUNNING'].{workflow: workflow, domain: input.domain} | [?workflow=='0e0747a4-1bbc-42be-b2ed-3c800b79f3ff'].{value: domain} | [0].value\")}}`)\",\n            \"services\": \n            [\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{result(\"get_executions\")[\"json\"] | json_query(\"results[?state == 'RUNNING'].{workflow: workflow, version: input.\"version 1\"} | [?workflow=='0e0747a4-1bbc-42be-b2ed-3c800b79f3ff'].{value: version} | [0].value\")}}\",\n                \"port\": 8080,\n                \"weight\": 100\n              },\n              {\n                \"kind\": \"Service\",\n                \"name\": \"front-end-{{ result(\"get_executions\")[\"json\"] | json_query(\"results[?state == 'RUNNING'].{workflow: workflow, version: input.\"version 2\"} | [?workflow=='0e0747a4-1bbc-42be-b2ed-3c800b79f3ff'].{value: version} | [0].value\") }}\",\n                \"port\": 8080,\n                \"weight\": 100\n              }\n            ]\n          }\n        ]\n      }\n}",
+        "strategy": "merge",
+        "namespace": "prod",
+        "connection": "vu9U3hXa3q0AAAABAC1hcHA6ZHluYXRyYWNlLmt1YmVybmV0ZXMuY29ubmVjdG9yOmNvbm5lY3Rpb24ABnRlbmFudAAGdGVuYW50ACQ3MTFlNDgwZS0zNzFiLTM3NDEtODY2OS1jZTlmMjk3MzA0MGS-71TeFdrerQ",
+        "resourceType": {
+          "kind": "IngressRoute",
+          "name": "ingressroutes",
+          "verbs": [
+            "delete",
+            "deletecollection",
+            "get",
+            "list",
+            "patch",
+            "create",
+            "update",
+            "watch"
+          ],
+          "apiVersion": "traefik.io/v1alpha1",
+          "namespaced": true
+        }
+      },
+      "action": "dynatrace.kubernetes.connector:patch-resource",
+      "position": {
+        "x": 0,
+        "y": 3
+      },
+      "conditions": {
+        "states": {
+          "kill_running_workflows": "OK"
+        }
+      },
+      "description": "Patches a Kubernetes resource",
+      "waitBefore": 2,
+      "predecessors": [
+        "kill_running_workflows"
+      ]
+    },
+    "kill_running_workflows": {
+      "name": "kill_running_workflows",
+      "input": {
+        "url": "jgg71876.apps.dynatrace.com/platform/automation/v1/executions/{{_.id }}/cancel?adminAccess=true",
+        "method": "POST",
+        "credential": {
+          "type": "token",
+          "tokenPrefix": "Bearer",
+          "credentialId": "CREDENTIALS_VAULT-C2F60D5F7A72BDFA"
+        },
+        "failOnResponseCodes": "400-599"
+      },
+      "action": "dynatrace.automations:http-function",
+      "position": {
+        "x": 0,
+        "y": 2
+      },
+      "conditions": {
+        "states": {
+          "get_executions": "OK"
+        }
+      },
+      "withItems": "id in {{ result(\"get_executions\")[\"json\"] | json_query(\"results[?state == 'RUNNING'].{workflow: workflow, id: id} | [?workflow=='0e0747a4-1bbc-42be-b2ed-3c800b79f3ff'].id\")}}",
+      "concurrency": 1,
+      "description": "Issue an HTTP request to any API.",
+      "predecessors": [
+        "get_executions"
+      ]
+    }
+  },
+  "description": "",
+  "actor": "7727947d-67b5-4e97-beb5-6a18c74d1eac",
+  "owner": "7727947d-67b5-4e97-beb5-6a18c74d1eac",
+  "ownerType": "USER",
+  "isPrivate": true,
+  "trigger": {
+    "eventTrigger": {
+      "isActive": true,
+      "filterQuery": "event.kind == \"DAVIS_PROBLEM\" AND event.status == \"ACTIVE\" AND (event.status_transition == \"CREATED\" OR event.status_transition == \"UPDATED\" OR event.status_transition == \"REOPENED\") AND (event.category == \"ERROR\" OR event.category == \"SLOWDOWN\" OR event.category == \"RESOURCE_CONTENTION\")",
+      "uniqueExpression": "{{ event()[\"event.id\"] }}-{{ \"open\" if event()[\"event.status_transition\"] in (\"CREATED\", \"UPDATED\", \"REOPENED\", \"REFRESHED\") else \"resolved\" }}-{{ event()[\"dt.davis.last_reopen_timestamp\"] }}",
+      "triggerConfiguration": {
+        "type": "davis-problem",
+        "value": {
+          "categories": {
+            "error": true,
+            "resource": true,
+            "slowdown": true
+          },
+          "entityTags": {},
+          "customFilter": "",
+          "onProblemClose": false,
+          "entityTagsMatch": "all"
+        }
+      }
+    }
+  },
+  "schemaVersion": 3,
+  "result": null,
+  "input": {},
+  "hourlyExecutionLimit": 1000,
+  "type": "STANDARD"
+}
