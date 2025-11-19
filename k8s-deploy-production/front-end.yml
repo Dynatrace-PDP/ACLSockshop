@@ -60,10 +60,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: front-end
+  name: front-end-v1
   labels:
     app: front-end-v1
     app.kubernetes.io/part-of: sockshop
+    app.kubernetes.io/version: v1
   namespace: prod
 spec:
   ports:
