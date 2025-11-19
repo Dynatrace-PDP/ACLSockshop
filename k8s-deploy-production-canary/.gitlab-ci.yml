@@ -19,9 +19,11 @@ dt-event-push:
         - |
             PAYLOAD2='", "version 2": "'
         - | 
-            PAYLOAD3='"}}'
+            PAYLOAD3='", "domain": "'
+        - | 
+            PAYLOAD4='"}}'
         - |
-            PAYLOAD="$PAYLOAD1$VERSION1$PAYLOAD2$VERSION2$PAYLOAD3"
+            PAYLOAD="$PAYLOAD1$VERSION1$PAYLOAD2$VERSION2$PAYLOAD3$DOMAIN$PAYLOAD4"
         - echo "$BEARER_TOKEN"
         - echo "$PAYLOAD"
         - echo "$WORKFLOW_UUID"
