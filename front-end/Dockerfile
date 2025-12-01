@@ -14,7 +14,7 @@ USER myuser
 RUN yarn install
 
 COPY . /usr/src/app
-
+# test
 # Start the app
 #CMD ["/usr/local/bin/npm", "start", "--domain=.jx-staging.35.241.184.104.nip.io"] 
 CMD ["/usr/local/bin/npm", "start"]
